@@ -1,8 +1,10 @@
-# leaflet-side-by-side
+# Leaflet.SwipeMode [Work in progress]
 
 A Leaflet control to add a split screen to compare two map overlays.
 
-![screencast example](screencast.gif)
+Requires [Leaflet](https://github.com/Leaflet/Leaflet/releases) 1.0.0+ branches
+
+![screencast example](docs/images/screencast.gif)
 
 ### L.control.sideBySide(_leftLayer[s]_, _rightLayer[s]_)
 

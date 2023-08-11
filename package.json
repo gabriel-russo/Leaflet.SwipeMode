@@ -1,49 +1,45 @@
 {
-  "name": "leaflet-side-by-side",
-  "version": "2.2.0",
+  "name": "leaflet-swipe-mode",
+  "version": "0.0.1",
   "description": "Compare two Leaflet layers side by side",
-  "main": "index.js",
-  "browserify": {
-    "transform": [
-      "css-img-datauri-stream",
-      "cssify",
-      "browserify-shim"
-    ]
-  },
-  "browserify-shim": {
-    "leaflet": "global:L"
-  },
+  "files": [
+    "dist"
+  ],
+  "main": "dist/leaflet.swipemode.min.js",
   "scripts": {
-    "build": "browserify index.js > leaflet-side-by-side.js",
-    "postbuild": "uglifyjs leaflet-side-by-side.js -cm -o leaflet-side-by-side.min.js",
-    "preversion": "npm test && npm run build",
-    "lint": "standard index.js",
-    "start": "budo index.js:leaflet-side-by-side.js --live",
-    "test": "npm run lint"
+    "build": "webpack --config=webpack.config.js",
+    "dev": "webpack --config=webpack.dev.config.js",
+    "lint": "eslint src/leaflet.swipemode.js"
   },
   "keywords": [
-    "leaflet"
+    "leaflet",
+    "swipemode",
+    "swipe",
+    "side-by-side",
+    "leaflet swipe",
+    "leaflet plugin",
+    "compare"
   ],
-  "author": "Gregor MacLennan / Digital Democracy",
+  "author": "Gabriel Russo",
   "license": "MIT",
   "devDependencies": {
-    "browserify": "^16.2.2",
-    "budo": "^11.2.0",
-    "standard": "^11.0.1",
-    "uglify-js": "^3.3.24"
+    "css-loader": "^6.8.1",
+    "eslint": "^8.46.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.28.0",
+    "mini-css-extract-plugin": "^2.7.6",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "browserify-shim": "^3.8.14",
-    "css-img-datauri-stream": "^0.1.5",
-    "cssify": "^1.0.3",
-    "leaflet": ">=0.7.7 <2.0.0"
+    "leaflet": "^1.9.4"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/digidem/leaflet-side-by-side.git"
+    "url": "git+https://github.com/gabriel-russo/Leaflet.SwipeMode.git"
   },
   "bugs": {
-    "url": "https://github.com/digidem/leaflet-side-by-side/issues"
+    "url": "https://github.com/gabriel-russo/Leaflet.SwipeMode/issues"
   },
-  "homepage": "https://github.com/digidem/leaflet-side-by-side#readme"
+  "homepage": "https://github.com/gabriel-russo/Leaflet.SwipeMode#readme"
 }
