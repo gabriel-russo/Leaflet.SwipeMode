@@ -1,133 +1,127 @@
 import * as L from 'leaflet';
 import './leaflet.swipemode.css';
+import { getRangeEvent } from './swipemode.utils';
 
-let mapWasDragEnabled;
-let mapWasTapEnabled;
-
-// Leaflet v0.7 backwards compatibility
-function on(el, types, fn, context) {
-  types.split(' ').forEach((type) => {
-    L.DomEvent.on(el, type, fn, context);
-  });
-}
-
-// Leaflet v0.7 backwards compatibility
-function off(el, types, fn, context) {
-  types.split(' ').forEach((type) => {
-    L.DomEvent.off(el, type, fn, context);
-  });
-}
-
-function getRangeEvent(rangeInput) {
-  return 'oninput' in rangeInput ? 'input' : 'change';
-}
-
-function cancelMapDrag() {
-  mapWasDragEnabled = this._map.dragging.enabled();
-  mapWasTapEnabled = this._map.tap && this._map.tap.enabled();
-  this._map.dragging.disable();
-  this._map.tap && this._map.tap.disable();
-}
-
-function uncancelMapDrag(e) {
-  this._refocusOnMap(e);
-  if (mapWasDragEnabled) {
-    this._map.dragging.enable();
-  }
-  if (mapWasTapEnabled) {
-    this._map.tap.enable();
-  }
-}
-
-// convert arg to an array - returns empty array if arg is undefined
-function asArray(arg) {
-  return (arg === 'undefined') ? [] : Array.isArray(arg) ? arg : [arg];
-}
-
-function noop() {}
-
-L.Control.SideBySide = L.Control.extend({
+L.Control.SwipeMode = L.Control.extend({
   options: {
+    position: 'topleft',
     thumbSize: 42,
     padding: 0,
+    text: {
+      title: 'Enable Swipe Mode',
+    },
   },
 
   initialize(leftLayers, rightLayers, options) {
-    this.setLeftLayers(leftLayers);
-    this.setRightLayers(rightLayers);
+    this._isSwipeModeActive = false;
+    this._userLeftLayer = leftLayers;
+    this._userRightLayer = rightLayers;
     L.setOptions(this, options);
   },
 
-  getPosition() {
+  setPosition: () => {},
+
+  includes: L.Evented.prototype || L.Mixin.Events,
+
+  onAdd(map) {
+    let className = 'leaflet-control-sm';
+
+    const container = L.DomUtil.create('div', `leaflet-bar`);
+
+    let link = L.DomUtil.create('a', `${className}-button`, container);
+
+    link.href = '#';
+
+    link.title = this.options.text.title;
+
+    L.DomEvent
+      .addListener(link, 'click', L.DomEvent.stopPropagation)
+      .addListener(link, 'click', L.DomEvent.preventDefault)
+      .addListener(link, 'click', this.toggle, this);
+
+    return container;
+  },
+
+  enabled() {
+    return this._isSwipeModeActive;
+  },
+
+  toggle() {
+    if (!this.enabled()) {
+      this._isSwipeModeActive = true;
+      this._enable();
+    } else {
+      this._isSwipeModeActive = false;
+      this._disable();
+    }
+  },
+
+  getDividerPosition() {
     let rangeValue = this._range.value;
     let offset = (0.5 - rangeValue) * (2 * this.options.padding + this.options.thumbSize);
     return this._map.getSize().x * rangeValue + offset;
   },
 
-  setPosition: noop,
+  _enable() {
+    this._swipeModeContainer = L.DomUtil.create('div', 'leaflet-sm', this._map.getContainer());
 
-  includes: L.Evented.prototype || L.Mixin.Events,
+    this._divider = L.DomUtil.create('div', 'leaflet-sm-divider', this._swipeModeContainer);
 
-  addTo(map) {
-    this.remove();
-    this._map = map;
+    this._range = L.DomUtil.create('input', 'leaflet-sm-range', this._swipeModeContainer);
 
-    let container = this._container = L.DomUtil.create('div', 'leaflet-sbs', map._controlContainer);
-
-    this._divider = L.DomUtil.create('div', 'leaflet-sbs-divider', container);
-    let range = this._range = L.DomUtil.create('input', 'leaflet-sbs-range', container);
-    range.type = 'range';
-    range.min = 0;
-    range.max = 1;
-    range.step = 'any';
-    range.value = 0.5;
-    range.style.paddingLeft = range.style.paddingRight = `${this.options.padding}px`;
+    this._range.type = 'range';
+    this._range.min = 0;
+    this._range.max = 1;
+    this._range.step = 'any';
+    this._range.value = 0.5;
+    this._range.style.paddingLeft = `${this.options.padding}px`;
+    this._range.style.paddingRight = `${this.options.padding}px`;
     this._addEvents();
     this._updateLayers();
-    return this;
   },
 
-  remove() {
+  _disable() {
     if (!this._map) {
       return this;
     }
+
     if (this._leftLayer) {
       this._leftLayer.getContainer().style.clip = '';
     }
+
     if (this._rightLayer) {
       this._rightLayer.getContainer().style.clip = '';
     }
+
     this._removeEvents();
-    L.DomUtil.remove(this._container);
 
-    this._map = null;
-
-    return this;
+    L.DomUtil.remove(this._swipeModeContainer);
   },
 
-  setLeftLayers(leftLayers) {
-    this._leftLayers = asArray(leftLayers);
+  setLeftLayer(leftLayer) {
+    this._userLeftLayer = leftLayer;
     this._updateLayers();
     return this;
   },
 
-  setRightLayers(rightLayers) {
-    this._rightLayers = asArray(rightLayers);
+  setRightLayer(rightLayer) {
+    this._userRightLayer = rightLayer;
     this._updateLayers();
     return this;
   },
 
   _updateClip() {
-    let map = this._map;
-    let nw = map.containerPointToLayerPoint([0, 0]);
-    let se = map.containerPointToLayerPoint(map.getSize());
-    let clipX = nw.x + this.getPosition();
-    let dividerX = this.getPosition();
+    let nw = this._map.containerPointToLayerPoint([0, 0]);
+    let se = this._map.containerPointToLayerPoint(this._map.getSize());
+    let clipX = nw.x + this.getDividerPosition();
+    let dividerX = this.getDividerPosition();
 
     this._divider.style.left = `${dividerX}px`;
     this.fire('dividermove', { x: dividerX });
+
     let clipLeft = `rect(${[nw.y, clipX, se.y, nw.x].join('px,')}px)`;
     let clipRight = `rect(${[nw.y, se.x, se.y, clipX].join('px,')}px)`;
+
     if (this._leftLayer) {
       this._leftLayer.getContainer().style.clip = clipLeft;
     }
@@ -142,60 +136,75 @@ L.Control.SideBySide = L.Control.extend({
     }
     let prevLeft = this._leftLayer;
     let prevRight = this._rightLayer;
-    this._leftLayer = this._rightLayer = null;
-    this._leftLayers.forEach(function (layer) {
-      if (this._map.hasLayer(layer)) {
-        this._leftLayer = layer;
-      }
-    }, this);
-    this._rightLayers.forEach(function (layer) {
-      if (this._map.hasLayer(layer)) {
-        this._rightLayer = layer;
-      }
-    }, this);
+
+    this._leftLayer = null;
+    this._rightLayer = null;
+
+    if (this._map.hasLayer(this._userLeftLayer)) {
+      this._leftLayer = this._userLeftLayer;
+    }
+
+    if (this._map.hasLayer(this._userRightLayer)) {
+      this._rightLayer = this._userRightLayer;
+    }
+
     if (prevLeft !== this._leftLayer) {
-      prevLeft && this.fire('leftlayerremove', { layer: prevLeft });
-      this._leftLayer && this.fire('leftlayeradd', { layer: this._leftLayer });
+      this._map.fire('swipemode:newlayer');
+      this._map.fire('swipemode:leftlayerremove', { layer: prevLeft });
+      this._map.fire('swipemode:leftlayeradd', { layer: this._leftLayer });
     }
+
     if (prevRight !== this._rightLayer) {
-      prevRight && this.fire('rightlayerremove', { layer: prevRight });
-      this._rightLayer && this.fire('rightlayeradd', { layer: this._rightLayer });
+      this._map.fire('swipemode:newlayer');
+      this.fire('swipemode:rightlayerremove', { layer: prevRight });
+      this.fire('swipemode:rightlayeradd', { layer: this._rightLayer });
     }
+
     this._updateClip();
   },
 
+  _enableMapDrag(e) {
+    this._refocusOnMap(e);
+    if (!this._map.dragging.enabled()) {
+      this._map.dragging.enable();
+    }
+  },
+
+  _cancelMapDrag() {
+    if (this._map.dragging.enabled()) {
+      this._map.dragging.disable();
+    }
+  },
+
   _addEvents() {
-    let range = this._range;
-    let map = this._map;
-    if (!map || !range) return;
-    map.on('move', this._updateClip, this);
-    map.on('layeradd layerremove', this._updateLayers, this);
-    L.DomEvent.on(range, getRangeEvent(range), this._updateClip, this);
-    L.DomEvent.on(range, 'touchstart', cancelMapDrag, this);
-    L.DomEvent.on(range, 'touchend', uncancelMapDrag, this);
-    L.DomEvent.on(range, 'mousedown', cancelMapDrag, this);
-    L.DomEvent.on(range, 'mouseup', uncancelMapDrag, this);
+    if (!this._map || !this._range) return;
+
+    this._map.on('move', this._updateClip, this);
+
+    this._map.on('swipemode:newlayer', this._updateLayers, this);
+
+    L.DomEvent.on(this._range, getRangeEvent(this._range), this._updateClip, this);
+
+    L.DomEvent.on(this._range, 'touchend', this._enableMapDrag, this)
+      .on(this._range, 'mouseup', this._enableMapDrag, this);
+
+    L.DomEvent.on(this._range, 'touchstart', this._cancelMapDrag, this)
+      .on(this._range, 'mousedown', this._cancelMapDrag, this);
   },
 
   _removeEvents() {
-    let range = this._range;
-    let map = this._map;
-    if (range) {
-      L.DomEvent.off(range, getRangeEvent(range), this._updateClip, this);
-      L.DomEvent.off(range, 'touchstart', cancelMapDrag, this);
-      L.DomEvent.off(range, 'touchend', uncancelMapDrag, this);
-      L.DomEvent.off(range, 'mousedown', cancelMapDrag, this);
-      L.DomEvent.off(range, 'mouseup', uncancelMapDrag, this);
+    if (this._range) {
+      L.DomEvent.off(this._range, getRangeEvent(this._range), this._updateClip, this)
+        .off(this._range, 'touchend', this._enableMapDrag, this)
+        .off(this._range, 'mouseup', this._enableMapDrag, this)
+        .off(this._range, 'mousedown', this._cancelMapDrag, this)
+        .off(this._range, 'touchstart', this._cancelMapDrag, this);
     }
-    if (map) {
-      map.off('layeradd layerremove', this._updateLayers, this);
-      map.off('move', this._updateClip, this);
+    if (this._map) {
+      this._map.off('swipemode:newlayer', this._updateLayers, this);
+      this._map.off('move', this._updateClip, this);
     }
   },
 });
 
-L.control.sideBySide = function (leftLayers, rightLayers, options) {
-  return new L.Control.SideBySide(leftLayers, rightLayers, options);
-};
-
-module.exports = L.Control.SideBySide;
+L.Control.swipeMode = (leftLayers, rightLayers, options) => new L.Control.SwipeMode(leftLayers, rightLayers, options);

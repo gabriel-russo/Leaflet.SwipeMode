@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-    <meta charset=utf-8/>
+    <meta charset="UTF-8"/>
     <meta name='viewport'
           content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui'/>
     <title>Leaflet.SwipeMode</title>
@@ -9,10 +9,6 @@
     <!-- Dependency to Leaflet -->
     <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css"/>
     <script type="text/javascript" src="node_modules/leaflet/dist/leaflet-src.js"></script>
-
-    <!-- Dependency to Leaflet Draw -->
-    <link rel="stylesheet" href="node_modules/leaflet-draw/dist/leaflet.draw-src.css"/>
-    <script src="node_modules/leaflet-draw/dist/leaflet.draw-src.js"></script>
 
     <!-- Files from current project -->
     <link rel="stylesheet" href="dist/leaflet.swipemode.css">
@@ -48,7 +44,7 @@
     attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
   }).addTo(map)
 
-  L.control.sideBySide(OpenTopoMap, osmLayer).addTo(map)
+  L.Control.swipeMode(OpenTopoMap, osmLayer).addTo(map)
 </script>
 </body>
 </html>
