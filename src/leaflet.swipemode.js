@@ -1,6 +1,7 @@
 import * as L from 'leaflet';
 import './leaflet.swipemode.css';
-import { getRangeEvent } from './swipemode.utils';
+import { findLayerById, getRangeEvent } from './swipemode.utils';
+import { createContainer, createExitBar, createLayerPicker } from './swipemode.dom';
 
 L.Control.SwipeMode = L.Control.extend({
   options: {
@@ -9,6 +10,9 @@ L.Control.SwipeMode = L.Control.extend({
     padding: 0,
     text: {
       title: 'Enable Swipe Mode',
+      leftLayerSelector: 'Left Layer',
+      rightLayerSelector: 'Right Layer',
+      button: 'Compare layers',
     },
   },
 
@@ -37,7 +41,8 @@ L.Control.SwipeMode = L.Control.extend({
     L.DomEvent
       .addListener(link, 'click', L.DomEvent.stopPropagation)
       .addListener(link, 'click', L.DomEvent.preventDefault)
-      .addListener(link, 'click', this.toggle, this);
+      .addListener(link, 'click', this.toggle, this)
+      .addListener(link, 'click', this._openLayerSelector, this);
 
     return container;
   },
@@ -56,7 +61,19 @@ L.Control.SwipeMode = L.Control.extend({
     }
   },
 
-  getDividerPosition() {
+  setLeftLayer(leftLayer) {
+    this._userLeftLayer = leftLayer;
+    this._updateLayers();
+    return this;
+  },
+
+  setRightLayer(rightLayer) {
+    this._userRightLayer = rightLayer;
+    this._updateLayers();
+    return this;
+  },
+
+  _getDividerPosition() {
     let rangeValue = this._range.value;
     let offset = (0.5 - rangeValue) * (2 * this.options.padding + this.options.thumbSize);
     return this._map.getSize().x * rangeValue + offset;
@@ -98,23 +115,11 @@ L.Control.SwipeMode = L.Control.extend({
     L.DomUtil.remove(this._swipeModeContainer);
   },
 
-  setLeftLayer(leftLayer) {
-    this._userLeftLayer = leftLayer;
-    this._updateLayers();
-    return this;
-  },
-
-  setRightLayer(rightLayer) {
-    this._userRightLayer = rightLayer;
-    this._updateLayers();
-    return this;
-  },
-
   _updateClip() {
     let nw = this._map.containerPointToLayerPoint([0, 0]);
     let se = this._map.containerPointToLayerPoint(this._map.getSize());
-    let clipX = nw.x + this.getDividerPosition();
-    let dividerX = this.getDividerPosition();
+    let clipX = nw.x + this._getDividerPosition();
+    let dividerX = this._getDividerPosition();
 
     this._divider.style.left = `${dividerX}px`;
     this.fire('dividermove', { x: dividerX });
@@ -204,6 +209,40 @@ L.Control.SwipeMode = L.Control.extend({
       this._map.off('swipemode:newlayer', this._updateLayers, this);
       this._map.off('move', this._updateClip, this);
     }
+  },
+
+  _openLayerSelector() {
+    L.DomUtil.addClass(this._container, 'leaflet-control-sm-layer-selector-open');
+
+    this._layerPickerContainer = createContainer('leaflet-control-sm-layer-selector-container', this._container);
+
+    createExitBar(this._layerPickerContainer, this._closeLayerSelector, this);
+
+    const pickerContainer = createContainer('leaflet-control-sm-layer-picker-container', this._layerPickerContainer);
+
+    createLayerPicker(
+      this.options.text.leftLayerSelector,
+      pickerContainer,
+      (e) => { this.setLeftLayer(findLayerById(this._map, e.target.value)); },
+      'left',
+      this,
+    );
+
+    createLayerPicker(
+      this.options.text.rightLayerSelector,
+      pickerContainer,
+      (e) => { this.setRightLayer(findLayerById(this._map, e.target.value)); },
+      'right',
+      this,
+    );
+  },
+
+  _closeLayerSelector() {
+    L.DomUtil.removeClass(this._container, 'leaflet-control-sm-layer-selector-open');
+    if (this._layerPickerContainer) {
+      L.DomUtil.empty(this._layerPickerContainer);
+    }
+    this.toggle();
   },
 });
 
