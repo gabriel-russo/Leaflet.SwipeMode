@@ -18,8 +18,14 @@ L.Control.SwipeMode = L.Control.extend({
 
   initialize(leftLayers, rightLayers, options) {
     this._isSwipeModeActive = false;
+    this._MAX_ZINDEX = 9999;
+
     this._userLeftLayer = leftLayers;
+    this._sourceLeftLayerZindex = leftLayers.options.zIndex || 1;
+
     this._userRightLayer = rightLayers;
+    this._sourceRightLayerZindex = rightLayers.options.zIndex || 1;
+
     L.setOptions(this, options);
   },
 
@@ -28,6 +34,11 @@ L.Control.SwipeMode = L.Control.extend({
   includes: L.Evented.prototype || L.Mixin.Events,
 
   onAdd(map) {
+    if (this.options.button) {
+      L.DomEvent.on(this.options.button, "click", this.toggle, this);
+      return L.DomUtil.create('div', 'leaflet-bar'); // Leaflet needs a DOM element returned
+    }
+
     let className = 'leaflet-control-sm';
 
     const container = L.DomUtil.create('div', `leaflet-bar`);
@@ -41,8 +52,8 @@ L.Control.SwipeMode = L.Control.extend({
     L.DomEvent
       .addListener(link, 'click', L.DomEvent.stopPropagation)
       .addListener(link, 'click', L.DomEvent.preventDefault)
-      .addListener(link, 'click', this.toggle, this)
-      .addListener(link, 'click', this._openLayerSelector, this);
+      .addListener(link, 'click', this._openLayerSelector, this)
+      .addListener(link, 'click', this.toggle, this);
 
     return container;
   },
@@ -63,12 +74,14 @@ L.Control.SwipeMode = L.Control.extend({
 
   setLeftLayer(leftLayer) {
     this._userLeftLayer = leftLayer;
+    this._sourceLeftLayerZindex = leftLayer.options.zIndex || 1;
     this._updateLayers();
     return this;
   },
 
   setRightLayer(rightLayer) {
     this._userRightLayer = rightLayer;
+    this._sourceRightLayerZindex = rightLayer.options.zIndex || 1;
     this._updateLayers();
     return this;
   },
@@ -103,10 +116,12 @@ L.Control.SwipeMode = L.Control.extend({
     }
 
     if (this._leftLayer) {
+      this._leftLayer.setZIndex(this._sourceLeftLayerZindex);
       this._leftLayer.getContainer().style.clip = '';
     }
 
     if (this._rightLayer) {
+      this._rightLayer.setZIndex(this._sourceRightLayerZindex);
       this._rightLayer.getContainer().style.clip = '';
     }
 
@@ -139,6 +154,7 @@ L.Control.SwipeMode = L.Control.extend({
     if (!this._map) {
       return this;
     }
+
     let prevLeft = this._leftLayer;
     let prevRight = this._rightLayer;
 
@@ -147,19 +163,27 @@ L.Control.SwipeMode = L.Control.extend({
 
     if (this._map.hasLayer(this._userLeftLayer)) {
       this._leftLayer = this._userLeftLayer;
+      this._leftLayer.setZIndex(this._MAX_ZINDEX);
     }
 
     if (this._map.hasLayer(this._userRightLayer)) {
       this._rightLayer = this._userRightLayer;
+      this._rightLayer.setZIndex(this._MAX_ZINDEX);
     }
 
     if (prevLeft !== this._leftLayer) {
+      if (prevLeft) {
+        prevLeft.setZIndex(this._sourceLeftLayerZindex);
+      }
       this._map.fire('swipemode:newlayer');
       this._map.fire('swipemode:leftlayerremove', { layer: prevLeft });
       this._map.fire('swipemode:leftlayeradd', { layer: this._leftLayer });
     }
 
     if (prevRight !== this._rightLayer) {
+      if (prevRight) {
+        prevRight.setZIndex(this._sourceRightLayerZindex);
+      }
       this._map.fire('swipemode:newlayer');
       this.fire('swipemode:rightlayerremove', { layer: prevRight });
       this.fire('swipemode:rightlayeradd', { layer: this._rightLayer });
@@ -246,4 +270,4 @@ L.Control.SwipeMode = L.Control.extend({
   },
 });
 
-L.Control.swipeMode = (leftLayers, rightLayers, options) => new L.Control.SwipeMode(leftLayers, rightLayers, options);
+L.Control.swipeMode = (leftLayer, rightLayer, options) => new L.Control.SwipeMode(leftLayer, rightLayer, options);
