@@ -12,7 +12,6 @@ L.Control.SwipeMode = L.Control.extend({
       title: 'Enable Swipe Mode',
       leftLayerSelector: 'Left Layer',
       rightLayerSelector: 'Right Layer',
-      button: 'Compare layers',
     },
   },
 
@@ -137,7 +136,7 @@ L.Control.SwipeMode = L.Control.extend({
     let dividerX = this._getDividerPosition();
 
     this._divider.style.left = `${dividerX}px`;
-    this.fire('dividermove', { x: dividerX });
+    this.fire('swipemode:dividermove', { x: dividerX });
 
     let clipLeft = `rect(${[nw.y, clipX, se.y, nw.x].join('px,')}px)`;
     let clipRight = `rect(${[nw.y, se.x, se.y, clipX].join('px,')}px)`;

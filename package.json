@@ -1,7 +1,7 @@
 {
   "name": "leaflet-swipe-mode",
   "version": "0.0.1",
-  "description": "Compare two Leaflet layers side by side",
+  "description": "Compare two Leaflet TileLayers side by side",
   "files": [
     "dist"
   ],
@@ -20,7 +20,7 @@
     "leaflet plugin",
     "compare"
   ],
-  "author": "Gabriel Russo",
+  "author": "Gabriel M. Russo",
   "license": "MIT",
   "devDependencies": {
     "css-loader": "^6.8.1",

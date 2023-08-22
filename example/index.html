@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaflet.SwipeMode</title>
+    <!-- LEAFLET SOURCE    -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+          integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+            integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Leaflet SwipeMode -->
+    <script type="application/javascript"
+            src="https://unpkg.com/leaflet-swipe-mode@0.0.1/dist/leaflet.swipemode.min.js"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-swipe-mode@0.0.1/dist/leaflet.swipemode.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+
+<style>
+    html {
+        font-family: Helvetica, sans-serif;
+    }
+
+    .plugin-title {
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        margin: 10px;
+    }
+
+    .plugin-title span {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-right: 35px;
+    }
+
+    .plugin-title a {
+        text-align: center;
+        align-self: center;
+        text-decoration: none;
+    }
+</style>
+
+<body>
+<div class="plugin-title">
+    <span>Leaflet.SwipeMode</span>
+    <a href="https://github.com/gabriel-russo/Leaflet.SwipeMode">github.com/gabriel-russo/Leaflet.SwipeMode</a>
+</div>
+<div id="map" style="width: 98vw; height: 85vh"></div>
+<div><a href="with-button.html">Example with custom html button</a></div>
+</body>
+
+<script>
+  const map = L.map('map').setView([51.505, -0.09], 13)
+
+  const Stamen_TonerLite = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    name: 'Stamen_TonerLite',
+    subdomains: 'abcd',
+    minZoom: 0,
+    maxZoom: 20,
+    ext: 'png'
+  }).addTo(map);
+
+  const Stamen_Watercolor = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    name: 'Stamen_Watercolor',
+    subdomains: 'abcd',
+    minZoom: 1,
+    maxZoom: 16,
+    ext: 'jpg'
+  }).addTo(map);
+
+  const OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+    name: 'OpenTopoMap',
+    maxZoom: 17
+  }).addTo(map);
+
+  const Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    name: 'Esri_WorldImagery',
+  }).addTo(map);
+
+  L.Control.swipeMode(Stamen_Watercolor, Stamen_TonerLite).addTo(map)
+</script>
+</html>

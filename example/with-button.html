@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaflet.SwipeMode</title>
+    <!-- LEAFLET SOURCE    -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+          integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+            integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Leaflet SwipeMode -->
+    <script type="application/javascript"
+            src="https://unpkg.com/leaflet-swipe-mode@0.0.1/dist/leaflet.swipemode.min.js"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-swipe-mode@0.0.1/dist/leaflet.swipemode.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+
+<style>
+    html {
+        font-family: Helvetica, sans-serif;
+    }
+
+    .row-stack {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .plugin-title {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        margin: 10px;
+        gap: 5px
+    }
+
+    .plugin-title span {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-right: 35px;
+    }
+
+    .plugin-title a {
+        text-align: center;
+        align-self: flex-start;
+        text-decoration: none;
+    }
+
+    .plugin-title .control-panel {
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        margin-top: 20px;
+        gap: 5px;
+    }
+
+    .plugin-title .control-panel p {
+        font-size: 1.2rem;
+        align-self: center;
+        margin: 0;
+    }
+
+    .plugin-title .control-panel button {
+        border: none;
+        padding: 5px 10px 5px 10px;
+        background-color: green;
+        color: white;
+        border-radius: 5px;
+    }
+
+    .plugin-title .control-panel button:hover {
+        background-color: darkgreen;
+        color: white;
+    }
+
+    .plugin-title .output-container {
+        max-height: 150px;
+        overflow-y: scroll;
+    }
+
+    #output {
+        font-size: 0.7rem;
+        font-weight: 500;
+        line-height: 1.5em;
+    }
+</style>
+
+<body class="row-stack">
+<div class="plugin-title">
+    <span>Leaflet.SwipeMode</span>
+    <a href="https://github.com/gabriel-russo/Leaflet.SwipeMode">github.com/gabriel-russo/Leaflet.SwipeMode</a>
+    <div class="control-panel">
+        <p>Control Panel</p>
+        <button id="swipemode-btn">Toggle Swipe Mode</button>
+    </div>
+</div>
+<div id="map" style="width: 60vw; height: 90vh"></div>
+</body>
+
+<script>
+  const map = L.map('map').setView([51.505, -0.09], 13)
+
+  const Stamen_TonerLite = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    name: 'Stamen_TonerLite',
+    subdomains: 'abcd',
+    minZoom: 0,
+    maxZoom: 20,
+    ext: 'png'
+  }).addTo(map);
+
+  const Stamen_Watercolor = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    name: 'Stamen_Watercolor',
+    subdomains: 'abcd',
+    minZoom: 1,
+    maxZoom: 16,
+    ext: 'jpg'
+  }).addTo(map);
+
+  const Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    name: 'Esri_WorldImagery',
+  }).addTo(map);
+
+  const options = {
+   button: document.getElementById("swipemode-btn"),
+  }
+
+  L.Control.swipeMode(Stamen_TonerLite, Stamen_Watercolor, options).addTo(map)
+</script>
+</html>
