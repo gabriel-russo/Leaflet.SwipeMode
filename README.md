@@ -16,7 +16,7 @@ checkout the [demo](https://gabriel-russo.github.io/Leaflet.SwipeMode/example/)
 npm install leaflet-swipe-mode
 ```
 
-## L.control.sideBySide(_leftLayer_, _rightLayer_)
+## L.Control.SwipeMode(_leftLayer_, _rightLayer_, _options_)
 
 Creates a new Leaflet Control for comparing two layers or collections of layers. It does not add the layers to the map - you need to do that manually.
 
@@ -29,14 +29,15 @@ Creates a new Leaflet Control for comparing two layers or collections of layers.
 | `options`    | Object         | Options |
 
 ## Options
-| parameter                 | type                | description                                                                                                      |
-|---------------------------|---------------------|------------------------------------------------------------------------------------------------------------------|
-| `padding`                 | Number              | Padding between slider min/max and the edge of the screen in pixels. Defaults to `44` - the width of the slider thumb |
-| `button`                  | Button HTML Element | If you want to make a webapp with custom html elements, you can bind a button to toggle this plugin              |
-| `text`                    | String              | You can translate the plugin inner text                                                                          |
-| `text.title`              | String              | Control's Button text                                                                                            |
-| `text.leftLayerSelector`  | String              | Select's left layer label                                                                                        |
-| `text.rightLayerSelector` | String              | Select's right layer label                                                                                       |
+| parameter                 | type                | description                                                                                                                                                                                                                            |
+|---------------------------|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `padding`                 | Number              | Padding between slider min/max and the edge of the screen in pixels. Defaults to `44` - the width of the slider thumb                                                                                                                  |
+| `button`                  | Button HTML Element | If you want to make a webapp with custom html elements, you can bind a button to toggle this plugin. This will bind a click event in your button. If you want full control, see `noControl` option                                     |
+| `noControl`               | Boolean             | If you want call all methods by yourself, set it to true. You have to call `toggle()` directly in code. If you use this option, you can let `leftLayer` and `rightLayer` null and set it later with `setRightLayer` and `setRightLayer` |
+| `text`                    | String              | You can translate the plugin inner text                                                                                                                                                                                                |
+| `text.title`              | String              | Control's Button text                                                                                                                                                                                                                  |
+| `text.leftLayerSelector`  | String              | Select's left layer label                                                                                                                                                                                                              |
+| `text.rightLayerSelector` | String              | Select's right layer label                                                                                                                                                                                                             |
 
 ### Option example
 
@@ -58,14 +59,16 @@ options = {
 
 Subscribe to events using [these methods](http://leafletjs.com/reference.html#events)
 
-| Event         | Data           | Description                                                                                                                                         |
-| ----------    | -------------- |-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `swipemode:newlayer`  | [LayerEvent](http://leafletjs.com/reference.html#layer-event) | Fired when a layer is added to any side                                                                                                             |
-| `swipemode:leftlayeradd`  | [LayerEvent](http://leafletjs.com/reference.html#layer-event) | Fired when a layer is added to the left-hand-side pane                                                                                              |
-| `swipemode:leftlayerremove` | [LayerEvent](http://leafletjs.com/reference.html#layer-event) | Fired when a layer is removed from the left-hand-side pane                                                                                          |
-| `swipemode:rightlayeradd` | [LayerEvent](http://leafletjs.com/reference.html#layer-event) | Fired when a layer is added to the right-hand-side pane                                                                                             |
+| Event                        | Data                                                          | Description                                                                                                                                         |
+|------------------------------|---------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `swipemode:start`            | Void                                                          | Fired when plugin starts                                                                                                                            |
+| `swipemode:stop`             | Void                                                          | Fired when plugin stops                                                                                                                             |
+| `swipemode:newlayer`         | Void                                                          | Fired when a layer is added to any side                                                                                                             |
+| `swipemode:leftlayeradd`     | [LayerEvent](http://leafletjs.com/reference.html#layer-event) | Fired when a layer is added to the left-hand-side pane                                                                                              |
+| `swipemode:leftlayerremove`  | [LayerEvent](http://leafletjs.com/reference.html#layer-event) | Fired when a layer is removed from the left-hand-side pane                                                                                          |
+| `swipemode:rightlayeradd`    | [LayerEvent](http://leafletjs.com/reference.html#layer-event) | Fired when a layer is added to the right-hand-side pane                                                                                             |
 | `swipemode:rightlayerremove` | [LayerEvent](http://leafletjs.com/reference.html#layer-event) | You guessed it... fired when a layer is removed from the right-hand-side pane                                                                       |
-| `swipemode:dividermove` | {x: Number} | Fired when the divider is moved. Returns an event object with the property `x` = the pixels of the divider from the left side of the map container. |
+| `swipemode:dividermove`      | {x: Number}                                                   | Fired when the divider is moved. Returns an event object with the property `x` = the pixels of the divider from the left side of the map container. |
 
 ## Methods
 

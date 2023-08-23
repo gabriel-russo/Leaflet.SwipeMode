@@ -8,6 +8,7 @@ L.Control.SwipeMode = L.Control.extend({
     position: 'topleft',
     thumbSize: 42,
     padding: 0,
+    noControl: false,
     text: {
       title: 'Enable Swipe Mode',
       leftLayerSelector: 'Left Layer',
@@ -15,15 +16,21 @@ L.Control.SwipeMode = L.Control.extend({
     },
   },
 
-  initialize(leftLayers, rightLayers, options) {
+  initialize(leftLayer, rightLayer, options) {
     this._isSwipeModeActive = false;
     this._MAX_ZINDEX = 9999;
 
-    this._userLeftLayer = leftLayers;
-    this._sourceLeftLayerZindex = leftLayers.options.zIndex || 1;
+    this._userLeftLayer = leftLayer;
 
-    this._userRightLayer = rightLayers;
-    this._sourceRightLayerZindex = rightLayers.options.zIndex || 1;
+    if (leftLayer) {
+      this._sourceLeftLayerZindex = leftLayer.options.zIndex || 1;
+    }
+
+    this._userRightLayer = rightLayer;
+
+    if (rightLayer) {
+      this._sourceRightLayerZindex = rightLayer.options.zIndex || 1;
+    }
 
     L.setOptions(this, options);
   },
@@ -33,8 +40,12 @@ L.Control.SwipeMode = L.Control.extend({
   includes: L.Evented.prototype || L.Mixin.Events,
 
   onAdd(map) {
+    if (this.options.noControl) {
+      return L.DomUtil.create('div', 'leaflet-bar'); // Leaflet needs a DOM element returned
+    }
+
     if (this.options.button) {
-      L.DomEvent.on(this.options.button, "click", this.toggle, this);
+      L.DomEvent.on(this.options.button, 'click', this.toggle, this);
       return L.DomUtil.create('div', 'leaflet-bar'); // Leaflet needs a DOM element returned
     }
 
@@ -65,23 +76,29 @@ L.Control.SwipeMode = L.Control.extend({
     if (!this.enabled()) {
       this._isSwipeModeActive = true;
       this._enable();
+      this._map.fire('swipemode:start');
     } else {
       this._isSwipeModeActive = false;
       this._disable();
+      this._map.fire('swipemode:stop');
     }
   },
 
   setLeftLayer(leftLayer) {
     this._userLeftLayer = leftLayer;
     this._sourceLeftLayerZindex = leftLayer.options.zIndex || 1;
-    this._updateLayers();
+    if (!this.options.noControl) {
+      this._updateLayers();
+    }
     return this;
   },
 
   setRightLayer(rightLayer) {
     this._userRightLayer = rightLayer;
     this._sourceRightLayerZindex = rightLayer.options.zIndex || 1;
-    this._updateLayers();
+    if (!this.options.noControl) {
+      this._updateLayers();
+    }
     return this;
   },
 
