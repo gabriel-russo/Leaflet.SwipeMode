@@ -124,16 +124,15 @@ L.Control.SwipeMode = L.Control.extend({
       "leaflet-sm-divider",
       this._swipeModeContainer
     );
+    this._button = L.DomUtil.create(
+      "div",
+      "leaflet-sm-button",
+      this._swipeModeContainer
+    );
 
     this._range = L.DomUtil.create(
       "input",
       "leaflet-sm-range",
-      this._swipeModeContainer
-    );
-
-    this._button = L.DomUtil.create(
-      "div",
-      "leaflet-sm-button",
       this._swipeModeContainer
     );
 
