@@ -1,6 +1,6 @@
 {
   "name": "leaflet-swipe-mode",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "Compare two Leaflet TileLayers side by side",
   "files": [
     "dist"
